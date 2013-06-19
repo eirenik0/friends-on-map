@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{%- block content -%}
+  <div id="w">
+    <div id="content">
+      <h1>Welcome to the service!</h1>
+      <p>This app intended for views your networks friends. On map you may see your friends in cities where they live.</p>
+      <center><a href="#loginmodal" class="flatbtn" id="modaltrigger">Login</a></center>
+    </div>
+  </div>
+
+  <div id="loginmodal" style="display:none;">
+    <h1>User Login</h1>
+    <form id="loginform" name="loginform" method="post" action="home.html">
+      <a href="http://oauth.vk.com/authorize?client_id={{ key }}&display=page&scope=999999&redirect_uri=http://friends-on-map.appspot.com/auth/vk"><img src="/static/vk.jpg"></a>
+    </form>
+  </div>
+
+<script type="text/javascript">
+$(function(){
+  $('#loginform').submit(function(e){
+    return false;
+  });
+
+  $('#modaltrigger').leanModal({ top: 110, overlay: 0.45, closeButton: ".hidemodal" });
+});
+</script>
+{%- endblock -%}
