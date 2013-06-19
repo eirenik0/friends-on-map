@@ -19,7 +19,7 @@ class Logout(handler.Base):
 
 config = {}
 config['webapp2_extras.sessions'] = {
-  'secret_key': 'MY SUPER SECRET COOKIE KEY FOR VK APPLICATION!!!11',
+  'secret_key': 'LKsdt4223o5khsdt9',
   'session_max_age': None,
   'cookie_args': {
     'max_age': 31556926,
@@ -33,7 +33,7 @@ config['webapp2_extras.sessions'] = {
 logging.getLogger().setLevel(logging.DEBUG)
 application = webapp2.WSGIApplication([
   (r'/', Home),
-  (r'/auth/vk', 'vk.Auth'),
+  (r'/auth/vk', 'APIs.vk.Auth'),
   (r'/logout', Logout),
 
 ], debug=True, config=config)
