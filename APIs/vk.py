@@ -10,8 +10,9 @@ import handler
 import model
 
 
-KEY = 'your key'
-SECRET = 'your secret'
+KEY = '3720247'
+SECRET = 'uOmPND7Xogaafizp6Xah'
+REDIRECT_URI = r'http://friends-on-map.appspot.com/auth/vk'
 
 
 class Auth(handler.Base):
@@ -27,9 +28,10 @@ Auths user and redirects him to home page.
   def get(self):
     code = self.request.get('code')
     payload = urllib.urlencode({
-      'client_id': KEY,
+      'redirect_uri': REDIRECT_URI,
       'client_secret': SECRET,
-      'code': code})
+      'code': code,
+      'client_id': KEY})
     token = urlfetch.fetch(
       url='https://oauth.vk.com/access_token?%s' % payload,
       method=urlfetch.GET).content
