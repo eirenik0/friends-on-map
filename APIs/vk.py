@@ -32,8 +32,8 @@ Auths user and redirects him to home page.
       'code': code,
       'client_id': KEY})
     token = urlfetch.fetch(
-      url='https://oauth.vk.com/access_token?%s' % payload,
-      method=urlfetch.GET).content
+        url='https://oauth.vk.com/access_token?%s' % payload,
+        method=urlfetch.GET).content
     token_json = json.loads(token)
     token = token_json['access_token']
     uid = token_json['user_id']
@@ -44,9 +44,9 @@ Auths user and redirects him to home page.
     user_info = user_info['response'][0]
 
     name, countryid, cityid, photo_url = ('%s %s' % (user_info['first_name'], user_info['last_name']),
-                                   user_info['country'],
-                                   user_info['city'],
-                                   user_info['photo_rec'])
+                                          user_info['country'],
+                                          user_info['city'],
+                                          user_info['photo_rec'])
 
     country_json = urlfetch.fetch(
         url='https://api.vk.com/method/places.getCountryById?cids=%s&access_token=%s' % (countryid, token),
