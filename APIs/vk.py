@@ -68,6 +68,7 @@ Auths user and redirects him to home page.
                     friends=friends)
       user.key = ndb.Key(model.User, user.uid)
       user.put()
+      self.redirect('/map')
 
   def get_country(self, id):
       return (self.url_fetch(method="places.getCountryById",

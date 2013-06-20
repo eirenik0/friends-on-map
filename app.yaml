@@ -1,5 +1,5 @@
 application: friends-on-map
-version: alpha01
+version: alpha02
 runtime: python27
 api_version: 1
 threadsafe: true

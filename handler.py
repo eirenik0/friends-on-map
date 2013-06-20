@@ -67,3 +67,6 @@ method was dispatched.
   def render(self, _template, **context):
     rv = self.jinja2.render_template(_template, **context)
     self.response.write(rv)
+
+  def write(self, string):
+      return self.response.out.write(unicode(string))
