@@ -5,18 +5,21 @@ import logging
 import webapp2
 import handler
 import model
-from APIs.vk import KEY, SECRET
+from APIs.vk import KEY, SECRET, REDIRECT_URI
 
 
 class Home(handler.Base):
     def get(self):
-        self.render('home.html', key=KEY, secret=SECRET)
+        self.render('home.html', key=KEY, secret=SECRET, redirect_url=REDIRECT_URI)
 
 
 class Map(handler.Base):
     def get(self):
-        user = model.User()
-        self.render('map.html', user=user)
+        self.request.headers['Content-Type'] = 'text/plain'
+        uid = self.request.cookies.get('uid')
+        user = model.User.get_by_id(uid)
+        address = '%s, %s' % (user.country, user.city)
+        self.render('map.html', name=user.name, photo=user.photo, address=address)
 
 config = {}
 config['webapp2_extras.sessions'] = {
