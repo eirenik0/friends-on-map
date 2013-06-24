@@ -89,6 +89,7 @@ class Auth(handler.Base):
         print "ID", id
         city = memcache.get('cid: %s' % id)
         if city is not None:
+            #print unicode("in cache", city)
             return city
         else:
             try:
@@ -97,7 +98,7 @@ class Auth(handler.Base):
             except:
                 return ""
             city = memcache.add('cid: %s' % id, c)
-            return city
+            return c
 
 
     def url_fetch(self, cids="", method="", fields=""):
