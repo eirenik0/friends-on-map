@@ -8,8 +8,8 @@ import handler
 import urllib
 import json
 
-KEY = '3720247'
-SECRET = 'uOmPND7Xogaafizp6Xah'
+KEY = ''
+SECRET = ''
 REDIRECT_URI = r'http://friends-on-map.appspot.com/auth/vk'
 
 #Point = namedtuple('Point', ["name", "address", "city", "country"])
