@@ -4,16 +4,16 @@ from google.appengine.ext import ndb
 
 
 class User(ndb.Model):
-  """ Stores user info.
-Expending existing webapp2 user object.
-"""
-  uid = ndb.StringProperty()
-  name = ndb.StringProperty()
-  city = ndb.StringProperty()
-  country = ndb.StringProperty()
-  friends = ndb.JsonProperty()
-  photo = ndb.StringProperty()
-  token = ndb.StringProperty()
+    """ Stores user info.
+    Expending existing webapp2 user object.
+    """
+    uid = ndb.StringProperty()
+    name = ndb.StringProperty()
+    city = ndb.StringProperty()
+    country = ndb.StringProperty()
+    friends = ndb.Context()
+    photo = ndb.StringProperty()
+    token = ndb.StringProperty()
 
 
 

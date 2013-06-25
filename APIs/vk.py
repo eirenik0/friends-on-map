@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+__author__ = 'infernion'
 
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
-from collections import namedtuple
+from geocode import Geocode
 import handler
 import urllib
 import json
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
 
 KEY = ''
 SECRET = ''
@@ -86,19 +90,18 @@ class Auth(handler.Base):
         """
         Take id and return format city string
         """
-        print "ID", id
+       # print "ID", id
         city = memcache.get('cid: %s' % id)
         if city is not None:
-            #print unicode("in cache", city)
             return city
         else:
             try:
-                c = (self.url_fetch(method="places.getCityById",
+                get_city = (self.url_fetch(method="places.getCityById",
                                     cids=id))['name']
             except:
                 return ""
-            city = memcache.add('cid: %s' % id, c)
-            return c
+            city = memcache.add('cid: %s' % id, get_city)
+            return get_city
 
 
     def url_fetch(self, cids="", method="", fields=""):
@@ -113,7 +116,7 @@ class Auth(handler.Base):
             url='https://api.vk.com/method/%s?uid=%s&cids=%s&fields=%s&access_token=%s' % (
                 method, self.uid, cids, fields, self.token),
             method=urlfetch.POST).content
-        print "json",  value_json
+       # print "json",  value_json
         if method == "friends.get" or method == "places.getCountryById":
             try:
                 #print "friends, country ",(json.loads(value_json))['response']
@@ -135,7 +138,9 @@ class Auth(handler.Base):
         def format_address(field, city_id, country_id):
             city = self.get_city(field[city_id])
             country = self.get_country(field[country_id])
-            return '%s, %s' % (city, country)
+            address = '%s, %s' % (city, country)
+            location = Geocode().get(address)
+            return address, location
 
         def format(field, first_name, last_name):
             return '%s %s' % (field[first_name], field[last_name])
@@ -146,15 +151,17 @@ class Auth(handler.Base):
                 if 'city' in field:
                     # Friends with city and country
                     friends.append({'name': format(field, 'first_name', 'last_name'),
-                                    'address': format_address(field, 'city', 'country')})
+                                    'address': format_address(field, 'city', 'country')[0],
+                                    'location': format_address(field, 'city', 'country')[1]})
 
                 elif 'city' not in field:
                     friends.append({'name': (format(field, 'first_name', 'last_name')),
-                                    'address': field['country']})
-
+                                    'address': format_address(field, '', 'country')[0],
+                                    'location': format_address(field, '', 'country')[1]})
             else:
             # Who haven't home
                 friends.append({'name': (format(field, 'first_name', 'last_name')),
-                                'address': 'Antarctica'})
+                                'address': 'Antarctica',
+                                'location': '-82.471829,-118.857425'})
         return friends
 
