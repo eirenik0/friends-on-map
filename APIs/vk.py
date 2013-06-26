@@ -12,9 +12,9 @@ import logging
 
 logging.getLogger().setLevel(logging.DEBUG)
 
-KEY = ''
-SECRET = ''
-REDIRECT_URI = r'http://friends-on-map.appspot.com/auth/vk'
+KEY = '3733644'
+SECRET = 'ZdbfMIFFl5JWd8FyfqMv'
+REDIRECT_URI = r'http://dev.friends-on-map.appspot.com/auth/vk'
 
 #Point = namedtuple('Point', ["name", "address", "city", "country"])
 
@@ -48,7 +48,7 @@ class Auth(handler.Base):
 
         friends = self.get_friends_from_json(user_friends)
         self.response.set_cookie('uid', self.uid)
-        memcache.add('friends', friends, time=10000)
+        memcache.add('%s friends' % self.uid, friends, time=10000)
 
         # write user data to db
         self.write_ndb(self.uid, name=name, city=city, country=country,
@@ -152,16 +152,19 @@ class Auth(handler.Base):
                     # Friends with city and country
                     friends.append({'name': format(field, 'first_name', 'last_name'),
                                     'address': format_address(field, 'city', 'country')[0],
-                                    'location': format_address(field, 'city', 'country')[1]})
+                                    'location': format_address(field, 'city', 'country')[1],
+                                    'uid': field['uid'], 'photo': field['photo'] })
 
                 elif 'city' not in field:
                     friends.append({'name': (format(field, 'first_name', 'last_name')),
                                     'address': format_address(field, '', 'country')[0],
-                                    'location': format_address(field, '', 'country')[1]})
+                                    'location': format_address(field, '', 'country')[1],
+                                    'uid': field['uid'], 'photo': field['photo']})
             else:
             # Who haven't home
                 friends.append({'name': (format(field, 'first_name', 'last_name')),
                                 'address': 'Antarctica',
-                                'location': '-82.471829,-118.857425'})
+                                'location': '-82.471829,-118.857425',
+                                'uid': field['uid'], 'photo': field['photo']})
         return friends
 

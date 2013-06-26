@@ -16,11 +16,13 @@ class Home(handler.Base):
 
 class Map(handler.Base):
     def get(self):
-        user = self.get_user_data('uid')
+        self.request.headers['Content-Type'] = 'text/plain'
+        self.uid = self.request.cookies.get('uid')  # get uid(key) from cookie
+        user = model.User.get_by_id(self.uid)
         address, coord = self.location(user)
-        friends = memcache.get('friends')
+        friends = memcache.get('%s friends' % self.uid)
         friends_json = self.friends_to_json(friends)
-        self.render('map.html', name=user.name, photo=user.photo, address=address, location=coord, friends=friends,
+        self.render('map.html', user=user, address=address, location=coord, friends=friends,
                     friends_json=friends_json)
 
     def friends_to_json(self, friends):
@@ -31,7 +33,9 @@ class Map(handler.Base):
                     friends_no_json.append({'lat': friend['location'][0],
                                             'lng': friend['location'][1],
                                             'name': friend['name'],
-                                            'address': friend['address']})
+                                            'address': friend['address'],
+                                            'url': "https://vk.com/%s" % friend[self.uid],
+                                            'photo': friend['photo']})
                 except:
                     pass
         #print friends_no_json
@@ -49,24 +53,6 @@ class Map(handler.Base):
             coords = "36.315125,-27.802738"
             return address, coords
         return address, coords
-
-    def get_cookie(self, key):
-        """
-        :param key: key to find cookie
-        :return: saved key value
-        """
-        self.request.headers['Content-Type'] = 'text/plain'
-        cookie = self.request.cookies.get(key)  # get uid(key) from cookie
-        return cookie
-
-    def get_user_data(self, data):
-        """
-        :param data:
-        :return: User class object from model
-        """
-        data_key = self.get_cookie(data)
-        return model.User.get_by_id(data_key)
-
 
 class Json(Map):
     def get(self):
