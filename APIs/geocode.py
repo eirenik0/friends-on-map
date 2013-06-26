@@ -8,6 +8,7 @@ from google.appengine.api import urlfetch
 import json
 
 
+
 class Geocode(object):
 
     def get(self, address):

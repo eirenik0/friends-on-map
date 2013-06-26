@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = 'infernion'
-
+from api_keys import VK_APP_KEY, VK_APP_SECRET, VK_AUTH_REDIRECT_URI
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from geocode import Geocode
@@ -9,12 +9,6 @@ import handler
 import urllib
 import json
 import logging
-
-logging.getLogger().setLevel(logging.DEBUG)
-
-KEY = '3733644'
-SECRET = 'ZdbfMIFFl5JWd8FyfqMv'
-REDIRECT_URI = r'http://dev.friends-on-map.appspot.com/auth/vk'
 
 #Point = namedtuple('Point', ["name", "address", "city", "country"])
 
@@ -64,10 +58,10 @@ class Auth(handler.Base):
         """
         code = self.request.get('code')
         payload = urllib.urlencode({
-            'redirect_uri': REDIRECT_URI,
-            'client_secret': SECRET,
+            'redirect_uri': VK_AUTH_REDIRECT_URI,
+            'client_secret': VK_APP_SECRET,
             'code': code,
-            'client_id': KEY})
+            'client_id': VK_APP_KEY})
         self.token = urlfetch.fetch(
             url='https://oauth.vk.com/access_token?%s' % payload,
             method=urlfetch.GET).content

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from google.appengine.api import memcache
-from APIs.vk import KEY, SECRET, REDIRECT_URI
+from APIs.api_keys import GMAP_API_KEY, VK_APP_KEY, VK_APP_SECRET, VK_AUTH_REDIRECT_URI
 import logging
 import webapp2
 import handler
@@ -12,7 +12,7 @@ import json
 
 class Home(handler.Base):
     def get(self):
-        self.render('home.html', key=KEY, secret=SECRET, redirect_url=REDIRECT_URI)
+        self.render('home.html', vk_key=VK_APP_KEY, vk_secret=VK_APP_SECRET, vk_redirect_url=VK_AUTH_REDIRECT_URI)
 
 class Map(handler.Base):
     def get(self):
@@ -23,7 +23,7 @@ class Map(handler.Base):
         friends = memcache.get('%s friends' % self.uid)
         friends_json = self.friends_to_json(friends)
         self.render('map.html', user=user, address=address, location=coord, friends=friends,
-                    friends_json=friends_json)
+                    friends_json=friends_json, gmap_key=GMAP_API_KEY)
 
     def friends_to_json(self, friends):
         friends_no_json = []
@@ -34,7 +34,7 @@ class Map(handler.Base):
                                             'lng': friend['location'][1],
                                             'name': friend['name'],
                                             'address': friend['address'],
-                                            'url': "https://vk.com/%s" % friend[self.uid],
+                                            'url': "https://vk.com/%s" % friend['uid'],
                                             'photo': friend['photo']})
                 except:
                     pass
@@ -56,7 +56,9 @@ class Map(handler.Base):
 
 class Json(Map):
     def get(self):
-        friends = memcache.get('friends')
+        self.request.headers['Content-Type'] = 'text/plain'
+        self.uid = self.request.cookies.get('uid')  # get uid(key) from cookie
+        friends = memcache.get('%s friends' % self.uid)
         friends_json = self.friends_to_json(friends)
         self.write(friends_json)
 
