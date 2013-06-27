@@ -1,6 +1,6 @@
 friends-on-map
 ==============
-Beta2 Released!
+Dev version
 Views your friends from VK on map
 
-http://friends-on-map.appspot.com
+http://dev.friends-on-map.appspot.com
