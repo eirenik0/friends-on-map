@@ -10,7 +10,6 @@ import urllib
 import json
 import logging
 
-#Point = namedtuple('Point', ["name", "address", "city", "country"])
 
 class Auth(handler.Base):
     """
@@ -27,9 +26,6 @@ class Auth(handler.Base):
         self.get_token()
         self.all_country = self.url_fetch(method="places.getCountryById",
                                           cids=",".join(map(str, range(236))))
-       #self.all_city = self.url_fetch(method="places.getCityById",
-       #                               cids=",".join(map(str, range(430))))
-
         user_info = self.url_fetch(method="users.get",
                                    fields="uid,first_name,last_name,city,country,photo_rec")
         user_friends = self.url_fetch(method="friends.get",
@@ -46,8 +42,7 @@ class Auth(handler.Base):
 
         # write user data to db
         self.write_ndb(self.uid, name=name, city=city, country=country,
-                       photo=photo_url, token=self.token, #friends=friends
-        )
+                       photo=photo_url, token=self.token)
         self.redirect('/map')
 
 

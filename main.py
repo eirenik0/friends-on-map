@@ -20,10 +20,7 @@ class Map(handler.Base):
         self.uid = self.request.cookies.get('uid')  # get uid(key) from cookie
         user = model.User.get_by_id(self.uid)
         address, coord = self.location(user)
-        friends = memcache.get('%s friends' % self.uid)
-        friends_json = self.friends_to_json(friends)
-        self.render('map.html', user=user, address=address, location=coord, friends=friends,
-                    friends_json=friends_json, gmap_key=GMAP_API_KEY)
+        self.render('map.html', user=user, address=address, location=coord, gmap_key=GMAP_API_KEY)
 
     def friends_to_json(self, friends):
         friends_no_json = []
@@ -38,7 +35,6 @@ class Map(handler.Base):
                                             'photo': friend['photo']})
                 except:
                     pass
-        #print friends_no_json
         friends_json = json.dumps(friends_no_json)
         return friends_json
 
@@ -54,6 +50,7 @@ class Map(handler.Base):
             return address, coords
         return address, coords
 
+
 class Json(Map):
     def get(self):
         self.request.headers['Content-Type'] = 'text/plain'
@@ -61,6 +58,7 @@ class Json(Map):
         friends = memcache.get('%s friends' % self.uid)
         friends_json = self.friends_to_json(friends)
         self.write(friends_json)
+
 
 class StaticMap(Map):
     def get(self):
