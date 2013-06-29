@@ -8,7 +8,6 @@ from geocode import Geocode
 import handler
 import urllib
 import json
-import logging
 
 
 class Auth(handler.Base):
@@ -105,15 +104,12 @@ class Auth(handler.Base):
             url='https://api.vk.com/method/%s?uid=%s&cids=%s&fields=%s&access_token=%s' % (
                 method, self.uid, cids, fields, self.token),
             method=urlfetch.POST).content
-       # print "json",  value_json
         if method == "friends.get" or method == "places.getCountryById":
             try:
-                #print "friends, country ",(json.loads(value_json))['response']
                 return (json.loads(value_json))['response']  # If use get method return all item in value
             except IndexError:
                 return ""
         try:
-                #print "else", (json.loads(value_json))['response'][0]
                 return (json.loads(value_json))['response'][0]   # Else set first
         except IndexError:
             return ""
