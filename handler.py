@@ -8,11 +8,9 @@ import webapp2
 from google.appengine.ext import ndb
 from webapp2_extras import jinja2
 from webapp2_extras import sessions
-from xml.dom import minidom
 import model
-import urllib2
 
-IP_URL = "http://api.hostip.info/?ip="
+
 
 class Base(webapp2.RequestHandler):
     """ The other handlers inherit from this class. Provides some helper methods
@@ -76,21 +74,6 @@ class Base(webapp2.RequestHandler):
     def write(self, string):
         return self.response.out.write(unicode(string))
 
-    def get_coords(self, ip):
-        url = IP_URL + ip
-        content = None
-        try:
-            content = urllib2.urlopen(url).read()
-        except URLError:
-            return
-
-        if content:
-            d = minidom.parseString(content)
-            coords = d.getElementsByTagName("gml:coordinates")
-            if coords and coords[0].childNodes[0].nodeValue:
-                lon, lat = coords[0].childNodes[0].nodeValue.split(',')
-                return lon, lat
-
     def write_ndb(self, uid, **kwargs):
         user = model.User()
         user.populate(uid=uid,
@@ -98,7 +81,6 @@ class Base(webapp2.RequestHandler):
                       city=kwargs['city'],
                       country=kwargs['country'],
                       photo=kwargs['photo'],
-                      #friends=kwargs['friends'],
                       token=kwargs['token'])
         user.key = ndb.Key(model.User, user.uid)
         user.put()
