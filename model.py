@@ -16,6 +16,12 @@ class User(ndb.Model):
     token = ndb.StringProperty()
 
 
+class CityLocation(ndb.Model):
+    address = ndb.StringProperty()
+    coords = ndb.StringProperty()
+
+
+
 
 
 
