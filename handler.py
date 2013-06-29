@@ -8,9 +8,11 @@ import webapp2
 from google.appengine.ext import ndb
 from webapp2_extras import jinja2
 from webapp2_extras import sessions
+from xml.dom import minidom
 import model
+import urllib2
 
-
+IP_URL = "http://api.hostip.info/?ip="
 
 class Base(webapp2.RequestHandler):
     """ The other handlers inherit from this class. Provides some helper methods
@@ -81,6 +83,7 @@ class Base(webapp2.RequestHandler):
                       city=kwargs['city'],
                       country=kwargs['country'],
                       photo=kwargs['photo'],
+                      friends=kwargs['friends'],
                       token=kwargs['token'])
         user.key = ndb.Key(model.User, user.uid)
         user.put()

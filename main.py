@@ -5,6 +5,7 @@ __author__ = 'infernion'
 from google.appengine.api import memcache
 from APIs.api_keys import GMAP_API_KEY, VK_APP_KEY, VK_APP_SECRET, VK_AUTH_REDIRECT_URI
 from APIs.geocode import Geocode
+from APIs.vk import UserData
 import logging
 import webapp2
 import handler
@@ -20,20 +21,24 @@ class Home(handler.Base):
 class Map(handler.Base):
     def get(self):
         self.request.headers['Content-Type'] = 'text/plain'
-        uid = self.request.cookies.get('uid')  # get uid(key) from cookie
-        user = model.User.get_by_id(uid)
-        address = '%s, %s' % (user.country, user.city)
+        self.uid = self.request.cookies.get('uid')  # get uid(key) from cookie
+        self.user = model.User.get_by_id(self.uid)
+        address = '%s, %s' % (self.user.country, self.user.city)
         geo = Geocode().get(address)
         coords = "%s, %s" % (geo[0], geo[1])
-        print coords
-        self.render('map.html', user=user, address=address, location=coords, gmap_key=GMAP_API_KEY)
+        self.render('map.html', user=self.user, address=address, location=coords, gmap_key=GMAP_API_KEY)
+
+    def uid(self):
+        return self.uid
+
+    def user(self):
+        return self.user
 
 
 class Json(Map):
     def get(self):
-        self.request.headers['Content-Type'] = 'text/plain'
-        uid = self.request.cookies.get('uid')
-        friends = memcache.get('%s friends' % uid)
+        user = self.user
+        friends = user.friends
         friends_json = self.friends_to_json(friends)
         self.write(friends_json)
 
@@ -53,6 +58,19 @@ class Json(Map):
         return friends_json
 
 
+class Load(handler.Base):
+    def get(self):
+        print 'before get'
+        self.render('load.html')
+        print 'after get'
+
+    def post(self):
+        print 'before'
+        user = UserData().get()
+        print 'after'
+        self.redirect('/map')
+
+
 config = {'webapp2_extras.sessions': {
     'secret_key': 'LKsdt4223o5khsdt9',
     'session_max_age': None,
@@ -70,7 +88,7 @@ application = webapp2.WSGIApplication([
     (r'/', Home),
     (r'/auth/vk', 'APIs.vk.Auth'),
     (r'/map', Map),
-    #(r'/map-static', StaticMap),
     (r'/json', Json),
+    (r'/load', Load),
 
 ], debug=True, config=config)

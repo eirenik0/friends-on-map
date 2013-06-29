@@ -4,6 +4,7 @@ __author__ = 'infernion'
 from api_keys import VK_APP_KEY, VK_APP_SECRET, VK_AUTH_REDIRECT_URI
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
+from google.appengine.api import taskqueue
 from geocode import Geocode
 import handler
 import urllib
@@ -11,42 +12,7 @@ import json
 
 
 class Auth(handler.Base):
-    """
-    Auth handler.
-
-    Args:
-    code: Get var with auth code from vk.
-
-    Returns:
-    Auths user and redirects him to map page.
-    """
-
     def get(self):
-        self.get_token()
-        self.all_country = self.url_fetch(method="places.getCountryById",
-                                          cids=",".join(map(str, range(236))))
-        user_info = self.url_fetch(method="users.get",
-                                   fields="uid,first_name,last_name,city,country,photo_rec")
-        user_friends = self.url_fetch(method="friends.get",
-                                      fields="uid,first_name,last_name,country,city,photo")
-
-        name, country, city, photo_url = ('%s %s' % (user_info['first_name'], user_info['last_name']),
-                                          self.get_country(user_info['country']),
-                                          self.get_city(user_info['city']),
-                                          user_info['photo_rec'])
-
-        friends = self.get_friends_from_json(user_friends)
-        self.response.set_cookie('uid', self.uid)
-        memcache.add('%s friends' % self.uid, friends, time=10000)
-
-        # write user data to db
-        self.write_ndb(self.uid, name=name, city=city, country=country,
-                       photo=photo_url, token=self.token)
-        self.redirect('/map')
-
-
-
-    def get_token(self):
         """
         Get user secret token to access VK API
         """
@@ -61,7 +27,49 @@ class Auth(handler.Base):
             method=urlfetch.GET).content
         token_json = json.loads(self.token)
         self.token = token_json['access_token']
-        self.uid = str(token_json['user_id'])
+        self.uid = token_json['user_id']
+        taskqueue.add(url='/load', target='1.worker')
+
+        self.redirect('/load')
+
+    def token(self):
+        return self.token
+
+    def uid(self):
+        return self.uid
+
+
+class UserData(handler.Base):
+    """
+    Args:
+    code: Get var with auth code from vk.
+
+    Returns:
+    Auths user and redirects him to map page.
+    """
+    def get(self):
+        print 'UserDAta'
+        self.uid = Auth().uid()
+        self.token = Auth().token()
+        self.all_country = self.url_fetch(method="places.getCountryById",
+                                          cids=",".join(map(str, range(236))))
+        user_info = self.url_fetch(method="users.get",
+                                   fields="uid,first_name,last_name,city,country,photo_rec")
+        user_friends = self.url_fetch(method="friends.get",
+                                      fields="uid,first_name,last_name,country,city,photo")
+
+        name, country, city, photo_url = ('%s %s' % (user_info['first_name'], user_info['last_name']),
+                                          self.get_country(user_info['country']),
+                                          self.get_city(user_info['city']),
+                                          user_info['photo_rec'])
+
+        friends = self.get_friends_from_json(user_friends)
+        self.response.set_cookie('uid', self.uid)
+        #memcache.add('%s friends' % self.uid, friends, time=10000)
+
+        # write user data to db
+        self.write_ndb(self.uid, name=name, city=city, country=country,
+                       photo=photo_url, token=self.token, friends=friends)
 
     def get_country(self, id):
         """
@@ -85,12 +93,11 @@ class Auth(handler.Base):
         else:
             try:
                 get_city = (self.url_fetch(method="places.getCityById",
-                                    cids=id))['name']
+                                           cids=id))['name']
             except:
                 return ""
             city = memcache.add('cid: %s' % id, get_city)
             return get_city
-
 
     def url_fetch(self, cids="", method="", fields=""):
         """

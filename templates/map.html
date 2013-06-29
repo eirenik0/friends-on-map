@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{%- block head -%}
+{% block head %}
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <title>Map - Friends on map</title>
-    <link href="/static/maps.css" rel="stylesheet" media="all">
+    <link href="/static/css/maps.css" rel="stylesheet" media="all">
 
     <script type="text/javascript"
       src="https://maps.googleapis.com/maps/api/js?key={{ gmap_key }}&sensor=false">
     </script>
 
-    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-1.9.1.min.js"></script>
     <script type="text/javascript">
       google.maps.visualRefresh = true;
 
@@ -53,9 +53,9 @@
     }
 google.maps.event.addDomListener(window, 'load', initialize);
     </script>
-{%- endblock -%}
+{% endblock %}
 
-{%- block content -%}
+{% block content %}
   <div id="map-canvas"></div>
 <script type="text/javascript">
        $(document).ready(function() {
@@ -92,4 +92,4 @@ google.maps.event.addDomListener(window, 'load', initialize);
         });
       });
 </script>
-{%- endblock -%}
+{% endblock %}

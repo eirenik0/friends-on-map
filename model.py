@@ -11,14 +11,11 @@ class User(ndb.Model):
     name = ndb.StringProperty()
     city = ndb.StringProperty()
     country = ndb.StringProperty()
-    friends = ndb.Context()
     photo = ndb.StringProperty()
     token = ndb.StringProperty()
+    friends = ndb.PickleProperty(repeated=True)
 
 
-class CityLocation(ndb.Model):
-    address = ndb.StringProperty()
-    coords = ndb.StringProperty()
 
 
 
