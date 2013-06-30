@@ -11,6 +11,7 @@ import webapp2
 import handler
 import model
 import json
+import time
 
 
 class Home(handler.Base):
@@ -21,23 +22,18 @@ class Home(handler.Base):
 class Map(handler.Base):
     def get(self):
         self.request.headers['Content-Type'] = 'text/plain'
-        self.uid = self.request.cookies.get('uid')  # get uid(key) from cookie
-        self.user = model.User.get_by_id(self.uid)
-        address = '%s, %s' % (self.user.country, self.user.city)
+        uid = self.request.cookies.get('uid')  # get uid(key) from cookie
+        user = model.User.get_by_id(uid)
+        address = '%s, %s' % (user.country, user.city)
         geo = Geocode().get(address)
         coords = "%s, %s" % (geo[0], geo[1])
-        self.render('map.html', user=self.user, address=address, location=coords, gmap_key=GMAP_API_KEY)
-
-    def uid(self):
-        return self.uid
-
-    def user(self):
-        return self.user
+        Map.user = user
+        self.render('map.html', user=user, address=address, location=coords, gmap_key=GMAP_API_KEY)
 
 
-class Json(Map):
+class Json(handler.Base):
     def get(self):
-        user = self.user
+        user = Map.user
         friends = user.friends
         friends_json = self.friends_to_json(friends)
         self.write(friends_json)
@@ -60,15 +56,7 @@ class Json(Map):
 
 class Load(handler.Base):
     def get(self):
-        print 'before get'
         self.render('load.html')
-        print 'after get'
-
-    def post(self):
-        print 'before'
-        user = UserData().get()
-        print 'after'
-        self.redirect('/map')
 
 
 config = {'webapp2_extras.sessions': {
@@ -90,5 +78,6 @@ application = webapp2.WSGIApplication([
     (r'/map', Map),
     (r'/json', Json),
     (r'/load', Load),
+    (r'/data', 'APIs.vk.UserData'),
 
 ], debug=True, config=config)

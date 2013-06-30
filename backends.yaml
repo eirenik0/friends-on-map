@@ -3,4 +3,4 @@ backends:
   class: B1
   instances: 1
   options: dynamic
-  start: /load
+  start: /data
