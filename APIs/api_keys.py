@@ -1,6 +1,6 @@
 __author__ = 'infernion'
 
-GMAP_API_KEY = 'AIzaSyBpb_LusFh8ogWusDk4oyuiRUboJ5O2AUw'
+GMAP_API_KEY = ''
 
 VK_APP_KEY = ''
 VK_APP_SECRET = ''
