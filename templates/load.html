@@ -31,43 +31,50 @@
 		background-image: url('/static/images/loading-bars.gif');
 		width: 150px;
 	}
-
    </style>
+
    <script type="text/javascript">
 
 	jQuery(document).ready(
 		function() {
+            var i=1;
+            function getData(){
+                $('#activity_panel').load('/data', function(response, status, xhr) {
+                   if (status == 'success'){
+                       window.location = '/map'}
+                   if (status == 'error' && i<5){
+                       getData();
+                       i++;
+                   }
+                });
+
+            }
+            getData();
 
 
-		  //
-		  // When a user clicks the 'loading-bars' link,
-		  // call showLoading with addClass specified
-		  //
-		  jQuery('a.loading-bars').ready(
+            //
+            // When a page load, showing loading bar
+            //
+		    jQuery('a.loading-bars').ready(
 
-			function() {
-				jQuery('#activity_panel').showLoading(
-	 			 {
-				    'addClass': 'loading-indicator-bars'
+			    function() {
+				    jQuery('#activity_panel').showLoading(
+	 			    {
+				        'addClass': 'loading-indicator-bars'
 
-				 }
-				);
-			}
+				    });
 
-		  );
-
+			    }
+            );
 
 		}
-
-	);
+    );
 
    </script>
 {% endblock %}
 {% block content %}
 
-    <div id="activity_panel">
-
-    </div>
+    <div id="activity_panel"></div>
     <div style="clear:both;"></div>
 
 {% endblock %}

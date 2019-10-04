@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = 'infernion'
+
 from api_keys import VK_APP_KEY, VK_APP_SECRET, VK_AUTH_REDIRECT_URI
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
@@ -9,6 +10,7 @@ from geocode import Geocode
 import handler
 import urllib
 import json
+import logging
 
 
 class Auth(handler.Base):
@@ -22,21 +24,17 @@ class Auth(handler.Base):
             'client_secret': VK_APP_SECRET,
             'code': code,
             'client_id': VK_APP_KEY})
-        self.token = urlfetch.fetch(
+        token = urlfetch.fetch(
             url='https://oauth.vk.com/access_token?%s' % payload,
             method=urlfetch.GET).content
-        token_json = json.loads(self.token)
-        self.token = token_json['access_token']
-        self.uid = token_json['user_id']
-        taskqueue.add(url='/load', target='1.worker')
+        token_json = json.loads(token)
+        token = str(token_json['access_token'])
+        uid = str(token_json['user_id'])
+        self.response.set_cookie('uid', uid)
+        Auth.uid = uid
+        Auth.token = token
 
         self.redirect('/load')
-
-    def token(self):
-        return self.token
-
-    def uid(self):
-        return self.uid
 
 
 class UserData(handler.Base):
@@ -49,8 +47,10 @@ class UserData(handler.Base):
     """
     def get(self):
         print 'UserDAta'
-        self.uid = Auth().uid()
-        self.token = Auth().token()
+        self.uid = Auth.uid
+        self.token = Auth.token
+        logging.info(self.uid)
+        logging.info(self.token)
         self.all_country = self.url_fetch(method="places.getCountryById",
                                           cids=",".join(map(str, range(236))))
         user_info = self.url_fetch(method="users.get",
@@ -64,7 +64,7 @@ class UserData(handler.Base):
                                           user_info['photo_rec'])
 
         friends = self.get_friends_from_json(user_friends)
-        self.response.set_cookie('uid', self.uid)
+
         #memcache.add('%s friends' % self.uid, friends, time=10000)
 
         # write user data to db
@@ -111,12 +111,15 @@ class UserData(handler.Base):
             url='https://api.vk.com/method/%s?uid=%s&cids=%s&fields=%s&access_token=%s' % (
                 method, self.uid, cids, fields, self.token),
             method=urlfetch.POST).content
+        logging.info(value_json)
         if method == "friends.get" or method == "places.getCountryById":
             try:
+                logging.info((json.loads(value_json))['response'])
                 return (json.loads(value_json))['response']  # If use get method return all item in value
             except IndexError:
                 return ""
         try:
+                logging.info((json.loads(value_json))['response'][0])
                 return (json.loads(value_json))['response'][0]   # Else set first
         except IndexError:
             return ""
